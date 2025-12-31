@@ -1,0 +1,14 @@
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# OS-specific
+._*
+
+# WordPress
+wp-config.php
+wp-content/uploads/
