@@ -3,7 +3,7 @@
  * Plugin Name: CZ Dictionary
  * Description: Search dictionary tags with ACF fields and show live results.
  * Version: 0.1.0
- * Author: CZ
+ * Author: Roberto Mauro
  */
 
 if (!defined('ABSPATH')) {
@@ -198,6 +198,8 @@ JS;
 .czd-dictionary {
     max-width: 900px;
     margin: 2em auto;
+    box-sizing: border-box;
+    width: 100%;
 }
 .czd-input {
     width: 100%;
