@@ -285,7 +285,13 @@ JS;
 }
 @media (max-width: 640px) {
     .czd-dictionary {
-        padding: 1.5em 1.25em;
+        /* padding: 1.5em 1.25em; */
+    }
+    .czd-results {
+        display: block;
+    }
+    .czd-result {
+        margin-bottom: 1.25em;
     }
     .czd-result {
         padding: 1em;
