@@ -541,8 +541,14 @@ function czd_enqueue_lemma_assets() {
 
             if (cut <= 0) {
                 var hasWhitespace = /\s/.test(text);
-                if (hasWhitespace && maxChars < threshold) return [null, node];
-                cut = maxChars;
+                // Se c'è whitespace ma non prima del limite, sposta l'intera parola
+                // alla pagina successiva per evitare tronchi a metà.
+                if (hasWhitespace) return [null, node];
+                // Caso estremo: singola parola più lunga della soglia.
+                // Se siamo all'inizio di una pagina, la mettiamo intera (overflow controllato)
+                // per evitare loop infinito; altrimenti la rimandiamo alla pagina successiva.
+                if (maxChars >= threshold) return [node, null];
+                return [null, node];
             }
 
             var head = document.createTextNode(text.slice(0, cut));
@@ -979,11 +985,10 @@ function czd_register_rest_routes() {
 }
 add_action('rest_api_init', 'czd_register_rest_routes');
 
-function czd_lemma_shortcode($atts) {
+function czd_lemma_shortcode($atts, $content = null) {
     $atts = shortcode_atts([
         'slug' => '',
         'name' => '',
-        'show_as' => '',
     ], $atts, 'lemma');
 
     $name = isset($atts['name']) ? (string) $atts['name'] : '';
@@ -1002,9 +1007,10 @@ function czd_lemma_shortcode($atts) {
         return '';
     }
 
-    $show_as = isset($atts['show_as']) && $atts['show_as'] !== ''
-        ? (string) $atts['show_as']
+    $show_as = is_string($content) && trim($content) !== ''
+        ? $content
         : $name;
+    $show_as = wp_kses_post(do_shortcode($show_as));
 
     czd_enqueue_lemma_assets();
 
@@ -1017,7 +1023,7 @@ function czd_lemma_shortcode($atts) {
         esc_attr($title),
         esc_attr($slug),
         esc_attr($name),
-        esc_html($show_as)
+        $show_as
     );
 
     return $html;
