@@ -989,6 +989,7 @@ function czd_lemma_shortcode($atts, $content = null) {
     $atts = shortcode_atts([
         'slug' => '',
         'name' => '',
+        'popup' => 'true',
     ], $atts, 'lemma');
 
     $name = isset($atts['name']) ? (string) $atts['name'] : '';
@@ -1007,24 +1008,36 @@ function czd_lemma_shortcode($atts, $content = null) {
         return '';
     }
 
+    $popup_raw = isset($atts['popup']) ? (string) $atts['popup'] : 'true';
+    $popup_value = strtolower(trim($popup_raw));
+    $popup_enabled = !in_array($popup_value, ['0', 'false', 'no', 'off'], true);
+
     $show_as = is_string($content) && trim($content) !== ''
         ? $content
         : $name;
     $show_as = wp_kses_post(do_shortcode($show_as));
 
-    czd_enqueue_lemma_assets();
-
     $href = home_url('/lemma/' . $slug);
     $title = sprintf("Leggi la definizione di '%s' su Cigno Zen", $name);
 
-    $html = sprintf(
-        '<a class="lemma" href="%1$s" title="%2$s" target="_blank" rel="noopener" data-lemma-slug="%3$s" data-lemma-name="%4$s">%5$s</a>',
-        esc_url($href),
-        esc_attr($title),
-        esc_attr($slug),
-        esc_attr($name),
-        $show_as
-    );
+    if ($popup_enabled) {
+        czd_enqueue_lemma_assets();
+        $html = sprintf(
+            '<a class="lemma" href="%1$s" title="%2$s" target="_blank" rel="noopener" data-lemma-slug="%3$s" data-lemma-name="%4$s">%5$s</a>',
+            esc_url($href),
+            esc_attr($title),
+            esc_attr($slug),
+            esc_attr($name),
+            $show_as
+        );
+    } else {
+        $html = sprintf(
+            '<a href="%1$s" title="%2$s" target="_blank" rel="noopener">%3$s</a>',
+            esc_url($href),
+            esc_attr($title),
+            $show_as
+        );
+    }
 
     return $html;
 }
