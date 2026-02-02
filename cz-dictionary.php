@@ -993,19 +993,22 @@ function czd_lemma_shortcode($atts, $content = null) {
     ], $atts, 'lemma');
 
     $name = isset($atts['name']) ? (string) $atts['name'] : '';
-    if ($name === '') {
-        return '';
-    }
 
     $slug = isset($atts['slug']) ? (string) $atts['slug'] : '';
     if ($slug === '') {
+        if ($name === '') {
+            return '';
+        }
         $slug = czd_normalize_lemma_slug($name);
-    } else {
-        $slug = sanitize_title($slug);
     }
+    $slug = sanitize_title($slug);
 
     if ($slug === '') {
         return '';
+    }
+
+    if ($name === '') {
+        $name = $slug;
     }
 
     $popup_raw = isset($atts['popup']) ? (string) $atts['popup'] : 'true';
