@@ -814,7 +814,7 @@ JS;
 a.lemma {
     color: var(--text);
     text-decoration: none;
-    border-bottom: 1px dotted rgba(20, 20, 20, 1);
+    border-bottom: 1px dotted var(--border, rgba(20, 20, 20, 1));
 }
 
 .lemma-overlay {
