@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CZ Dictionary
  * Description: Search dictionary tags with ACF fields and show live results.
- * Version: 0.1.0
+ * Version: 0.2.4
  * Author: Roberto Mauro
  */
 
