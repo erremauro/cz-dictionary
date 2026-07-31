@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CZ Dictionary
  * Description: Search dictionary tags with ACF fields and show live results.
- * Version: 0.2.4
+ * Version: 0.2.5
  * Author: Roberto Mauro
  */
 
@@ -1020,7 +1020,7 @@ function czd_lemma_shortcode($atts, $content = null) {
         : $name;
     $show_as = wp_kses_post(do_shortcode($show_as));
 
-    $href = home_url('/lemma/' . $slug);
+    $href = trailingslashit(home_url('/lemma/' . $slug));
     $title = sprintf("Leggi la definizione di '%s' su Cigno Zen", $name);
 
     if ($popup_enabled) {
