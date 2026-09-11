@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] 2026-09-11
+### Fixed
+- Fix missing trailing slash on internal /lemma/ links (ACF short_definition/description cross-references, REST API definition_url, JS fallback URL) — was generating unnecessary 301 redirects on ~1150 internal links
+
 ## [0.2.5] 2026-07-31
 ### Fixed
 - The `lemma` shortcode's generated URL now consistently ends with a trailing slash.

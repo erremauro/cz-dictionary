@@ -10,6 +10,34 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Aggiunge lo slash finale ai link interni /lemma/{slug} privi di esso.
+ * Molte definizioni ACF contengono cross-reference scritti a mano
+ * (es. href="/lemma/marga") che altrimenti generano un 301 inutile
+ * verso la versione con slash, sprecando crawl budget su centinaia di URL.
+ */
+function czd_fix_lemma_link_slashes($html) {
+    if (!is_string($html) || $html === '') {
+        return $html;
+    }
+    return preg_replace('/(href=(["\'])\/lemma\/[a-z0-9-]+)\2/i', '$1/$2', $html);
+}
+
+function czd_is_term_field_context($post_id) {
+    if ($post_id instanceof WP_Term) {
+        return true;
+    }
+    return is_string($post_id) && strpos($post_id, 'term_') === 0;
+}
+
+add_filter('acf/format_value/name=short_definition', function ($value, $post_id, $field) {
+    return czd_is_term_field_context($post_id) ? czd_fix_lemma_link_slashes($value) : $value;
+}, 20, 3);
+
+add_filter('acf/format_value/name=description', function ($value, $post_id, $field) {
+    return czd_is_term_field_context($post_id) ? czd_fix_lemma_link_slashes($value) : $value;
+}, 20, 3);
+
 function czd_format_short_definition($term_id) {
     $short_definition = function_exists('get_field') ? get_field('short_definition', 'term_' . $term_id) : '';
     $short_definition = wp_kses_post($short_definition);
@@ -48,7 +76,7 @@ function czd_get_terms_data() {
             'synonyms_csv' => is_string($synonyms_csv) ? $synonyms_csv : '',
             'readings' => is_string($readings) ? $readings : '',
             'short_definition_html' => $short_definition,
-            'definition_url' => home_url('/lemma/' . $term->slug),
+            'definition_url' => trailingslashit(home_url('/lemma/' . $term->slug)),
         ];
     }
 
@@ -492,10 +520,10 @@ function czd_enqueue_lemma_assets() {
         try {
             var u = new URL(endpointBase);
             var basePath = u.pathname.replace(/\\/+$/, '');
-            var lemmaPath = basePath.replace(/\\/wp-json\\/czd\\/v1\\/lemma$/, '') + '/lemma/' + encodeURIComponent(slug);
+            var lemmaPath = basePath.replace(/\\/wp-json\\/czd\\/v1\\/lemma$/, '') + '/lemma/' + encodeURIComponent(slug) + '/';
             return u.origin + lemmaPath;
         } catch (e) {
-            return '/lemma/' + encodeURIComponent(slug);
+            return '/lemma/' + encodeURIComponent(slug) + '/';
         }
     }
 
@@ -966,7 +994,7 @@ function czd_rest_get_lemma($request) {
         'name' => $term->name,
         'show_as' => is_string($show_as) ? $show_as : '',
         'short_definition_html' => $short_definition,
-        'definition_url' => home_url('/lemma/' . $term->slug),
+        'definition_url' => trailingslashit(home_url('/lemma/' . $term->slug)),
     ];
 }
 
