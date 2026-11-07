@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CZ Dictionary
  * Description: Search dictionary tags with ACF fields and show live results.
- * Version: 0.2.5
+ * Version: 0.2.7
  * Author: Roberto Mauro
  */
 
@@ -971,6 +971,53 @@ function czd_dictionary_shortcode() {
 }
 add_shortcode('cz_dictionary', 'czd_dictionary_shortcode');
 
+/**
+ * Slug del tag (post_tag) con questo nome, o '' se non esiste.
+ * Il confronto in SQL dipende dalla collation (spesso ignora accenti e maiuscole),
+ * quindi tra i candidati si preferisce quello con il nome identico.
+ */
+function czd_find_lemma_slug_by_name($name) {
+    static $cache = [];
+
+    $name = trim(wp_specialchars_decode((string) $name, ENT_QUOTES));
+    if ($name === '') {
+        return '';
+    }
+    if (array_key_exists($name, $cache)) {
+        return $cache[$name];
+    }
+
+    $terms = get_terms([
+        'taxonomy' => 'post_tag',
+        'name' => $name,
+        'hide_empty' => false,
+    ]);
+
+    $slug = '';
+    if (!is_wp_error($terms) && !empty($terms)) {
+        $wanted = czd_lemma_name_key($name);
+        $match = $terms[0];
+        foreach ($terms as $term) {
+            if (czd_lemma_name_key($term->name) === $wanted) {
+                $match = $term;
+                break;
+            }
+        }
+        $slug = (string) $match->slug;
+    }
+
+    $cache[$name] = $slug;
+    return $slug;
+}
+
+function czd_lemma_name_key($name) {
+    $value = wp_specialchars_decode((string) $name, ENT_QUOTES);
+    if (class_exists('Normalizer')) {
+        $value = Normalizer::normalize($value, Normalizer::FORM_C);
+    }
+    return mb_strtolower(trim((string) $value), 'UTF-8');
+}
+
 function czd_rest_get_lemma($request) {
     $slug = (string) $request->get_param('slug');
     $slug = sanitize_title($slug);
@@ -1027,7 +1074,12 @@ function czd_lemma_shortcode($atts, $content = null) {
         if ($name === '') {
             return '';
         }
-        $slug = czd_normalize_lemma_slug($name);
+        // Lo slug reale del tag non sempre coincide con quello ricavato dal nome
+        // (es. "bhikṣu" → tag "bhikku", "Śakra" → "sakra"): prima cerca il tag per nome.
+        $slug = czd_find_lemma_slug_by_name($name);
+        if ($slug === '') {
+            $slug = czd_normalize_lemma_slug($name);
+        }
     }
     $slug = sanitize_title($slug);
 

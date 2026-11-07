@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] 2026-11-07
+### Fixed
+- `[lemma name="…"]` now links to the tag with that name instead of a slug derived from the name, which broke when the tag's real slug differs (e.g. `bhikṣu` → `/lemma/bhikku/`, not `/lemma/bhiksu/`; `Śakra` → `/lemma/sakra/`, not `/lemma/akra/`). Falls back to the derived slug when no tag has that name; an explicit `slug="…"` is used as is.
+- Plugin header version aligned with the changelog.
+
 ## [0.2.6] 2026-09-11
 ### Fixed
 - Fix missing trailing slash on internal /lemma/ links (ACF short_definition/description cross-references, REST API definition_url, JS fallback URL) — was generating unnecessary 301 redirects on ~1150 internal links
